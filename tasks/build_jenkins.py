@@ -41,10 +41,11 @@ class BuildJenkinsProject:
             driver.find_element(By.NAME, "j_password").send_keys(JENKINS_PASS)
             driver.find_element(By.NAME, "Submit").click()
             # 等待登入後首頁載入
-            wait.until(EC.presence_of_element_located((By.LINK_TEXT, "S053")))
+            project_selector = 'a[href*="job/S053/"]'
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, project_selector)))
 
             # 點擊 S053 專案並確認已進入頁面
-            project = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "S053")))
+            project = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector)))
             retries = 3
             for _ in range(retries):
                 project.click()
@@ -55,7 +56,7 @@ class BuildJenkinsProject:
                     if _ == retries - 1:
                         raise
                     time.sleep(2)
-                    project = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "S053")))
+                    project = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector)))
 
             # 點擊建置
             build_btn = driver.find_element(By.LINK_TEXT, "建置專案")

@@ -41,9 +41,8 @@ class BuildJenkinsProject:
             driver.find_element(By.NAME, "j_password").send_keys(JENKINS_PASS)
             driver.find_element(By.NAME, "Submit").click()
             # 等待登入後首頁載入
-            project_selector = (
-                'a.jenkins-table__link.model-link.inside[href="job/S053/"]'
-            )
+            # 僅點擊 href 完全等於 job/S053/ 的連結
+            project_selector = 'a[href="job/S053/"]'
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, project_selector)))
 
             # 點擊 S053 專案並確認已進入頁面

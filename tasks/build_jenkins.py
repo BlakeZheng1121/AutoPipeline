@@ -2,6 +2,9 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 import os
 
@@ -21,32 +24,58 @@ class BuildJenkinsProject:
         options = Options()
         options.add_experimental_option("detach", True)
         driver = webdriver.Chrome(options=options)
+        wait = WebDriverWait(driver, 10)
 
         try:
             print("[BuildJenkinsProject] 開啟 Jenkins...")
             driver.get(JENKINS_URL)
-            time.sleep(2)
-
-            # 自動登入
-            driver.find_element(By.NAME, "j_username").send_keys(JENKINS_USER)
-            driver.find_element(By.NAME, "j_password").send_keys(JENKINS_PASS)
-            driver.find_element(By.NAME, "Submit").click()
             time.sleep(3)
 
-            # 點擊 S053 專案
-            project = driver.find_element(By.LINK_TEXT, "S053")
-            project.click()
-            time.sleep(2)
+            # 移動滑鼠到登入按鈕並點擊
+            login_btn = driver.find_element(By.LINK_TEXT, "登入")
+            ActionChains(driver).move_to_element(login_btn).click().perform()
+            time.sleep(3)
+            wait.until(EC.presence_of_element_located((By.NAME, "j_username")))
+
+            # 自動輸入帳號密碼
+            driver.find_element(By.NAME, "j_username").send_keys(JENKINS_USER)
+            time.sleep(3)
+            driver.find_element(By.NAME, "j_password").send_keys(JENKINS_PASS)
+            time.sleep(3)
+            driver.find_element(By.NAME, "Submit").click()
+            time.sleep(3)
+            # 等待登入後首頁載入
+            project_selector = 'a[href*="job/S053/"]'
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, project_selector)))
+            time.sleep(3)
+
+            # 點擊 S053 專案並確認已進入頁面
+            project = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector)))
+            retries = 3
+            for _ in range(retries):
+                project.click()
+                time.sleep(3)
+                try:
+                    wait.until(EC.presence_of_element_located((By.LINK_TEXT, "建置專案")))
+                    break
+                except Exception:
+                    if _ == retries - 1:
+                        raise
+                    time.sleep(3)
+                    project = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector)))
 
             # 點擊建置
             build_btn = driver.find_element(By.LINK_TEXT, "建置專案")
+            time.sleep(3)
             build_btn.click()
+            time.sleep(3)
             print("[BuildJenkinsProject] 已觸發建置 S053！")
-            time.sleep(5)
+            time.sleep(3)
 
         except Exception as e:
             print(f"[BuildJenkinsProject] 發生錯誤: {e}")
         finally:
+            input("[BuildJenkinsProject] 任務完成，按 Enter 關閉瀏覽器...")
             driver.quit()
 
         return True

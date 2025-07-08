@@ -31,6 +31,13 @@ class OpenFolder:
                 if os.path.isdir(downloads_path):
                     subprocess.Popen(["xdg-open", downloads_path])
 
+            if os.path.isdir(downloads_path):
+                files = os.listdir(downloads_path)
+                for f in files:
+                    print(f"[OpenFolder] {f}")
+            else:
+                print(f"[OpenFolder] 未找到 Downloads 資料夾: {downloads_path}")
+
             return True
         except Exception as e:
             print(f"[OpenFolder] 打開資料夾失敗: {e}")

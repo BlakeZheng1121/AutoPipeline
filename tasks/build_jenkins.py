@@ -2,6 +2,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
 from dotenv import load_dotenv
 import os
 
@@ -27,7 +28,12 @@ class BuildJenkinsProject:
             driver.get(JENKINS_URL)
             time.sleep(2)
 
-            # 自動登入
+            # 移動滑鼠到登入按鈕並點擊
+            login_btn = driver.find_element(By.LINK_TEXT, "登入")
+            ActionChains(driver).move_to_element(login_btn).click().perform()
+            time.sleep(2)
+
+            # 自動輸入帳號密碼
             driver.find_element(By.NAME, "j_username").send_keys(JENKINS_USER)
             driver.find_element(By.NAME, "j_password").send_keys(JENKINS_PASS)
             driver.find_element(By.NAME, "Submit").click()

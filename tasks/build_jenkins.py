@@ -3,6 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 import os
 
@@ -22,6 +24,7 @@ class BuildJenkinsProject:
         options = Options()
         options.add_experimental_option("detach", True)
         driver = webdriver.Chrome(options=options)
+        wait = WebDriverWait(driver, 10)
 
         try:
             print("[BuildJenkinsProject] 開啟 Jenkins...")
@@ -31,18 +34,20 @@ class BuildJenkinsProject:
             # 移動滑鼠到登入按鈕並點擊
             login_btn = driver.find_element(By.LINK_TEXT, "登入")
             ActionChains(driver).move_to_element(login_btn).click().perform()
-            time.sleep(2)
+            wait.until(EC.presence_of_element_located((By.NAME, "j_username")))
 
             # 自動輸入帳號密碼
             driver.find_element(By.NAME, "j_username").send_keys(JENKINS_USER)
             driver.find_element(By.NAME, "j_password").send_keys(JENKINS_PASS)
             driver.find_element(By.NAME, "Submit").click()
-            time.sleep(3)
+            # 等待登入後首頁載入
+            wait.until(EC.presence_of_element_located((By.LINK_TEXT, "S053")))
 
             # 點擊 S053 專案
-            project = driver.find_element(By.LINK_TEXT, "S053")
+            project = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "S053")))
             project.click()
-            time.sleep(2)
+            # 確認已進入專案頁面
+            wait.until(EC.presence_of_element_located((By.LINK_TEXT, "建置專案")))
 
             # 點擊建置
             build_btn = driver.find_element(By.LINK_TEXT, "建置專案")

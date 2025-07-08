@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 import os
@@ -59,7 +59,19 @@ class BuildJenkinsProject:
             )
             param_build.click()
             print("[BuildJenkinsProject] 已選擇帶參數建置")
-            time.sleep(5)
+
+            # 等待參數頁面載入
+            wait.until(
+                EC.presence_of_all_elements_located(
+                    (By.CSS_SELECTOR, "tr.jenkins-form-item")
+                )
+            )
+
+            rows = driver.find_elements(By.CSS_SELECTOR, "tr.jenkins-form-item")
+            for row in rows[:3]:
+                select_elem = row.find_element(By.TAG_NAME, "select")
+                Select(select_elem).select_by_index(0)
+            print("[BuildJenkinsProject] 已選擇最新版本")
 
         except Exception as e:
             print(f"[BuildJenkinsProject] 發生錯誤: {e}")

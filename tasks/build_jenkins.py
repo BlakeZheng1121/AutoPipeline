@@ -45,15 +45,18 @@ class BuildJenkinsProject:
             project_selector = 'a[href="job/S053/"]'
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, project_selector)))
 
-            # 點擊 S053 專案並確認已進入頁面
-            project = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector)))
+            # 點擊 S053 專案展開選單
+            project = wait.until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector))
+            )
             project.click()
-            wait.until(EC.presence_of_element_located((By.LINK_TEXT, "建置專案")))
 
-            # 點擊建置
-            build_btn = driver.find_element(By.LINK_TEXT, "建置專案")
-            build_btn.click()
-            print("[BuildJenkinsProject] 已觸發建置 S053！")
+            # 選擇「帶參數建置」
+            param_build = wait.until(
+                EC.element_to_be_clickable((By.LINK_TEXT, "帶參數建置"))
+            )
+            param_build.click()
+            print("[BuildJenkinsProject] 已選擇帶參數建置")
             time.sleep(5)
 
         except Exception as e:

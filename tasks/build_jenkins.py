@@ -61,6 +61,9 @@ class BuildJenkinsProject:
             param_build.click()
             print("[BuildJenkinsProject] 已選擇帶參數建置，等待頁面載入...")
             wait.until(EC.url_changes(current_url))
+            new_url = driver.current_url
+            print(f"[BuildJenkinsProject] 跳轉後網址: {new_url}")
+            driver.get(new_url)
 
             # 等待參數頁面載入後再尋找下拉式選單
             wait.until(

@@ -1,0 +1,36 @@
+# 忽略環境設定
+.env
+
+# 忽略 Python 編譯產物
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# 忽略虛擬環境
+venv/
+env/
+ENV/
+.venv/
+
+# 忽略 VSCode 等編輯器設定
+.vscode/
+.idea/
+
+# 忽略 macOS / Windows 系統垃圾
+.DS_Store
+Thumbs.db
+
+# 忽略 log 與執行中產生的輸出
+*.log
+*.tmp
+*.bak
+
+# 忽略瀏覽器下載的 driver 檔案
+chromedriver.exe
+chromedriver.log
+
+# 忽略打包產物
+*.zip
+dist/
+build/

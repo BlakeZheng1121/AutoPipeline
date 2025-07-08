@@ -51,10 +51,7 @@ class BuildJenkinsProject:
             project = wait.until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector))
             )
-            # 只點擊一次下拉箭頭避免重複導向專案頁面
-            chevron = project.find_element(By.CSS_SELECTOR, "button.jenkins-menu-dropdown-chevron")
-            chevron.click()
-            print("[BuildJenkinsProject] 展開 S053 選單")
+            project.click()
 
             # 選擇「帶參數建置」
             param_build = wait.until(

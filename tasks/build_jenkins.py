@@ -29,6 +29,8 @@ class BuildJenkinsProject:
         try:
             print("[BuildJenkinsProject] 開啟 Jenkins...")
             driver.get(JENKINS_URL)
+            # 頁面開啟後將視窗最大化
+            driver.maximize_window()
             time.sleep(2)
 
             # 移動滑鼠到登入按鈕並點擊

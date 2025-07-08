@@ -68,8 +68,14 @@ class BuildJenkinsProject:
             )
 
             rows = driver.find_elements(By.CSS_SELECTOR, "tr.jenkins-form-item")
-            for row in rows[:3]:
+            print(f"[BuildJenkinsProject] 找到 {len(rows)} 個 jenkins-form-item")
+            for idx, row in enumerate(rows[:3]):
+                print(
+                    f"[BuildJenkinsProject] row {idx} HTML: {row.get_attribute('outerHTML')}"
+                )
                 select_elem = row.find_element(By.TAG_NAME, "select")
+                options = [o.text for o in select_elem.find_elements(By.TAG_NAME, "option")]
+                print(f"[BuildJenkinsProject] row {idx} options: {options}")
                 Select(select_elem).select_by_index(0)
             print("[BuildJenkinsProject] 已選擇最新版本")
 

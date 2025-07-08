@@ -68,16 +68,21 @@ class BuildJenkinsProject:
             )
 
             rows = driver.find_elements(By.CSS_SELECTOR, "tr.jenkins-form-item")
-            print(f"[BuildJenkinsProject] 找到 {len(rows)} 個 jenkins-form-item")
-            for idx, row in enumerate(rows[:3]):
-                print(
-                    f"[BuildJenkinsProject] row {idx} HTML: {row.get_attribute('outerHTML')}"
-                )
-                select_elem = row.find_element(By.TAG_NAME, "select")
-                options = [o.text for o in select_elem.find_elements(By.TAG_NAME, "option")]
-                print(f"[BuildJenkinsProject] row {idx} options: {options}")
-                Select(select_elem).select_by_index(0)
-            print("[BuildJenkinsProject] 已選擇最新版本")
+            print(f"[BuildJenkinsProject] 找到 {len(rows)} 個下拉式選單")
+            for row in rows:
+                try:
+                    name_elem = row.find_element(By.CSS_SELECTOR, "td.setting-name")
+                    name = name_elem.text.strip()
+                except Exception:
+                    name = "(unknown)"
+
+                try:
+                    select_elem = row.find_element(By.TAG_NAME, "select")
+                    options = [o.text.strip() for o in select_elem.find_elements(By.TAG_NAME, "option")]
+                except Exception:
+                    options = []
+
+                print(f"[BuildJenkinsProject] 選單名稱: {name}，內容: {options}")
 
         except Exception as e:
             print(f"[BuildJenkinsProject] 發生錯誤: {e}")

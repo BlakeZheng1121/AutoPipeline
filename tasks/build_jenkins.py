@@ -53,14 +53,16 @@ class BuildJenkinsProject:
             )
             project.click()
 
-            # 選擇「帶參數建置」
+            # 選擇「帶參數建置」並等待頁面跳轉
+            current_url = driver.current_url
             param_build = wait.until(
                 EC.element_to_be_clickable((By.LINK_TEXT, "帶參數建置"))
             )
             param_build.click()
-            print("[BuildJenkinsProject] 已選擇帶參數建置")
+            print("[BuildJenkinsProject] 已選擇帶參數建置，等待頁面載入...")
+            wait.until(EC.url_changes(current_url))
 
-            # 等待參數頁面載入
+            # 等待參數頁面載入後再尋找下拉式選單
             wait.until(
                 EC.presence_of_all_elements_located(
                     (By.CSS_SELECTOR, "tr.jenkins-form-item")

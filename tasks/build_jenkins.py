@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 import os
@@ -29,6 +29,8 @@ class BuildJenkinsProject:
         try:
             print("[BuildJenkinsProject] 開啟 Jenkins...")
             driver.get(JENKINS_URL)
+            # 頁面開啟後將視窗最大化
+            driver.maximize_window()
             time.sleep(2)
 
             # 移動滑鼠到登入按鈕並點擊
@@ -41,28 +43,44 @@ class BuildJenkinsProject:
             driver.find_element(By.NAME, "j_password").send_keys(JENKINS_PASS)
             driver.find_element(By.NAME, "Submit").click()
             # 等待登入後首頁載入
-            project_selector = 'a[href*="job/S053/"]'
+            # 僅點擊 href 完全等於 job/S053/ 的連結
+            project_selector = 'a[href="job/S053/"]'
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, project_selector)))
 
-            # 點擊 S053 專案並確認已進入頁面
-            project = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector)))
-            retries = 3
-            for _ in range(retries):
-                project.click()
-                try:
-                    wait.until(EC.presence_of_element_located((By.LINK_TEXT, "建置專案")))
-                    break
-                except Exception:
-                    if _ == retries - 1:
-                        raise
-                    time.sleep(2)
-                    project = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector)))
+            # 點擊 S053 專案展開選單
+            project = wait.until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, project_selector))
+            )
+            # 只點擊一次下拉箭頭避免重複導向專案頁面
+            chevron = project.find_element(By.CSS_SELECTOR, "button.jenkins-menu-dropdown-chevron")
+            chevron.click()
+            print("[BuildJenkinsProject] 展開 S053 選單")
 
-            # 點擊建置
-            build_btn = driver.find_element(By.LINK_TEXT, "建置專案")
-            build_btn.click()
-            print("[BuildJenkinsProject] 已觸發建置 S053！")
-            time.sleep(5)
+            # 選擇「帶參數建置」
+            param_build = wait.until(
+                EC.element_to_be_clickable((By.LINK_TEXT, "帶參數建置"))
+            )
+            param_build.click()
+            print("[BuildJenkinsProject] 已選擇帶參數建置")
+
+            # 等待參數頁面載入
+            wait.until(
+                EC.presence_of_all_elements_located(
+                    (By.CSS_SELECTOR, "tr.jenkins-form-item")
+                )
+            )
+
+            rows = driver.find_elements(By.CSS_SELECTOR, "tr.jenkins-form-item")
+            print(f"[BuildJenkinsProject] 找到 {len(rows)} 個 jenkins-form-item")
+            for idx, row in enumerate(rows[:3]):
+                print(
+                    f"[BuildJenkinsProject] row {idx} HTML: {row.get_attribute('outerHTML')}"
+                )
+                select_elem = row.find_element(By.TAG_NAME, "select")
+                options = [o.text for o in select_elem.find_elements(By.TAG_NAME, "option")]
+                print(f"[BuildJenkinsProject] row {idx} options: {options}")
+                Select(select_elem).select_by_index(0)
+            print("[BuildJenkinsProject] 已選擇最新版本")
 
         except Exception as e:
             print(f"[BuildJenkinsProject] 發生錯誤: {e}")

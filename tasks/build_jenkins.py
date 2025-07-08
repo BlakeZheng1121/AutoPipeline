@@ -47,6 +47,7 @@ class BuildJenkinsProject:
         except Exception as e:
             print(f"[BuildJenkinsProject] 發生錯誤: {e}")
         finally:
+            input("[BuildJenkinsProject] 任務完成，按 Enter 關閉瀏覽器...")
             driver.quit()
 
         return True

@@ -53,14 +53,19 @@ class BuildJenkinsProject:
             )
             project.click()
 
-            # 選擇「帶參數建置」
+            # 選擇「帶參數建置」並等待頁面跳轉
+            current_url = driver.current_url
             param_build = wait.until(
                 EC.element_to_be_clickable((By.LINK_TEXT, "帶參數建置"))
             )
             param_build.click()
-            print("[BuildJenkinsProject] 已選擇帶參數建置")
+            print("[BuildJenkinsProject] 已選擇帶參數建置，等待頁面載入...")
+            wait.until(EC.url_changes(current_url))
+            new_url = driver.current_url
+            print(f"[BuildJenkinsProject] 跳轉後網址: {new_url}")
+            driver.get(new_url)
 
-            # 等待參數頁面載入
+            # 等待參數頁面載入後再尋找下拉式選單
             wait.until(
                 EC.presence_of_all_elements_located(
                     (By.CSS_SELECTOR, "tr.jenkins-form-item")
@@ -68,16 +73,21 @@ class BuildJenkinsProject:
             )
 
             rows = driver.find_elements(By.CSS_SELECTOR, "tr.jenkins-form-item")
-            print(f"[BuildJenkinsProject] 找到 {len(rows)} 個 jenkins-form-item")
-            for idx, row in enumerate(rows[:3]):
-                print(
-                    f"[BuildJenkinsProject] row {idx} HTML: {row.get_attribute('outerHTML')}"
-                )
-                select_elem = row.find_element(By.TAG_NAME, "select")
-                options = [o.text for o in select_elem.find_elements(By.TAG_NAME, "option")]
-                print(f"[BuildJenkinsProject] row {idx} options: {options}")
-                Select(select_elem).select_by_index(0)
-            print("[BuildJenkinsProject] 已選擇最新版本")
+            print(f"[BuildJenkinsProject] 找到 {len(rows)} 個下拉式選單")
+            for row in rows:
+                try:
+                    name_elem = row.find_element(By.CSS_SELECTOR, "td.setting-name")
+                    name = name_elem.text.strip()
+                except Exception:
+                    name = "(unknown)"
+
+                try:
+                    select_elem = row.find_element(By.TAG_NAME, "select")
+                    options = [o.text.strip() for o in select_elem.find_elements(By.TAG_NAME, "option")]
+                except Exception:
+                    options = []
+
+                print(f"[BuildJenkinsProject] 選單名稱: {name}，內容: {options}")
 
         except Exception as e:
             print(f"[BuildJenkinsProject] 發生錯誤: {e}")
